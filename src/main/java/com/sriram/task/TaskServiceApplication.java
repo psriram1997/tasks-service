@@ -3,7 +3,7 @@ package com.sriram.task;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.sriram"})
 public class TaskServiceApplication {
 
 	public static void main(String[] args) {

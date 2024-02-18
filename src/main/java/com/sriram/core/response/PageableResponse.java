@@ -1,10 +1,11 @@
 package com.sriram.core.response;
 
+import java.util.List;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 
 @Data
-public class PageableResponse extends BaseRestResponse {
+public class PageableResponse<T> extends BaseRestResponse<List<T>> {
 
     private static final long serialVersionUID = -2846910247972036035L;
 
@@ -21,7 +22,7 @@ public class PageableResponse extends BaseRestResponse {
     private boolean sorted;
     private boolean empty;
 
-    public PageableResponse(Boolean ok, String code, Page page) {
+    public PageableResponse(Boolean ok, String code, Page<T> page) {
         this.setOk(ok);
         this.setCode(code);
         if (page != null) {

@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,7 @@ public class Task extends AbstractBaseModel {
 
     private String description;
 
-    @NotBlank(message = "Status cannot be blank")
+    @NotNull(message = "Status cannot be blank")
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 

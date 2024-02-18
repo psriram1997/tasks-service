@@ -3,11 +3,14 @@ package com.sriram.core.beans;
 import com.sriram.core.exception.CustomException;
 import com.sriram.core.response.BaseRestResponse;
 import com.sriram.core.response.ErrorResponse;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import io.sentry.Sentry;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,28 +47,23 @@ public class CustomControllerAdvice extends ResponseEntityExceptionHandler {
         );
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity handleExceptions(Exception e) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR; // 500
-        Sentry.captureException(e);
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity genericExceptionHandler(ConstraintViolationException constraintViolationException, WebRequest webRequest)
+    {
+        Sentry.captureException(constraintViolationException);
+        ConstraintViolation error = (ConstraintViolation) constraintViolationException.getConstraintViolations().toArray()[0];
+        var message = error.getMessage();
         BaseRestResponse<Object> response = BaseRestResponse.builder()
             .ok(Boolean.FALSE)
             .error(new ErrorResponse(
-                status,
-                e.getClass().getPackageName().contains("com.sriram") ? e.getMessage()
-                    : "Something went wrong."
+                HttpStatus.BAD_REQUEST,
+                message
             ))
             .build();
 
-        StringWriter stringWriter = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(stringWriter);
-        e.printStackTrace(printWriter);
-        String stackTrace = stringWriter.toString();
-        logger.error(stackTrace);
-
         return new ResponseEntity<>(
             response,
-            status
+            HttpStatus.BAD_REQUEST
         );
     }
 
@@ -159,6 +157,31 @@ public class CustomControllerAdvice extends ResponseEntityExceptionHandler {
                 HttpStatus.BAD_REQUEST
         );
 
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity handleExceptions(Exception e) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR; // 500
+        Sentry.captureException(e);
+        BaseRestResponse<Object> response = BaseRestResponse.builder()
+            .ok(Boolean.FALSE)
+            .error(new ErrorResponse(
+                status,
+                e.getClass().getPackageName().contains("com.sriram") ? e.getMessage()
+                    : "Something went wrong."
+            ))
+            .build();
+
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        e.printStackTrace(printWriter);
+        String stackTrace = stringWriter.toString();
+        logger.error(stackTrace);
+
+        return new ResponseEntity<>(
+            response,
+            status
+        );
     }
 
 }
