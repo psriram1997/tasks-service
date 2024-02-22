@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 public class Task extends AbstractBaseModel {
 
     @NotBlank(message = "Name cannot be blank")
-    private String name;
+    private String title;
 
     private String description;
 
